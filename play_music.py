@@ -30,22 +30,34 @@ class Shell(cmd.Cmd):
         else:
             print('already logged in')
 
-    def do_dump(self, query):
-        """Dump a station based on query to a playlist"""
+    def do_dump_artist(self, query):
         seed_song = search(self.api, query)
-        station_id = self.api.create_station('temp station', track_id=seed_song['store_id'])
+        artist_id = seed_song['artist_id']
+        title = seed_song['artist']
+        station_id = self.api.create_station('temp station', artist_id=artist_id)
+        self.dump(station_id, title)
+
+    def do_dump_song(self, query):
+        seed_song = search(self.api, query)
+        track_id = seed_song['store_id']
+        title = seed_song['title']
+        station_id = self.api.create_station('temp station', track_id=track_id)
+        self.dump(station_id, title)
+
+    def dump(self, station_id, title):
+        """Dump a station based on query to a playlist"""
         track_ids = []
         count = 0
-        while len(track_ids) < 1000 and count < 10:  # Seems to stop at 200 tracks regardless of count
+        while len(track_ids) < 1000 and count < 20:
             tracks = self.api.get_station_tracks(station_id, num_tracks=1000, recently_played_ids=track_ids)
-            track_ids += [track['storeId'] for track in tracks]
+            track_ids += [track['storeId'] if 'storeId' in track else track['id'] for track in tracks]
             count += 1
             print('{} - {}'.format(count, len(track_ids)))
         print('creating playlist')
         playlist_id = self.api.create_playlist(
-            'g {} {}'.format(seed_song['title'], datetime.now().isoformat(' ')))
+            'g {} {}'.format(title, datetime.now().isoformat(' ')))
         print('adding songs')
-        self.api.add_songs_to_playlist(playlist_id, track_ids)
+        self.api.add_songs_to_playlist(playlist_id, list(set(track_ids)))  # duplicates are possible for uploaded songs
         print('songs added')
 
     def do_exit(self, arg):
@@ -65,10 +77,12 @@ def get_song_info(raw):
     artist = raw['track']['artist']
     album = raw['track']['album']
     store_id = raw['track']['storeId']
+    artist_id = raw['track']['artistId'][0]
     return {'title': title,
             'artist': artist,
             'album': album,
-            'store_id': store_id}
+            'store_id': store_id,
+            'artist_id': artist_id}
 
 
 if __name__ == '__main__':
