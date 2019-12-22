@@ -1,0 +1,24 @@
+Nathaniel Schaaf
+CS 457 P1
+31 Aug 2012
+
+Contents:
+    chat.c
+    Makefile
+    README
+    
+chat.c:
+    The only thing notable here is that to get the IP of the host for the server version of the program, gethostbyname() was used. I read that this is deprecated and there is a better way to get the information, but wasn't able to get it to work properly. If I understand it correctly, gethostbyname() uses the hosts file. This gives a nice IP on the CS machines, but on my home computer where there wasn't an entry for my machine resulted in a 127... address.
+    
+    Running:
+        ./chat
+            --starts a chat server
+        ./chat -s [host] -p [port]
+            --starts a chat client that connects to the specified host:port combo
+    
+Makefile:
+    'make' compiles the program and outputs the executable 'chat'
+    'make clean' removes the executable and object files
+
+README:
+    this document
