@@ -1,3 +1,9 @@
+'''
+This computes the result of (base ^ exponent) % modulus for large numbers with
+both an iterative and recursive solution. Time complexity is O(logN) where N is
+the exponent.
+'''
+
 def power_mod(base, exponent, modulus):
     result = 1
     base = base % modulus
